@@ -49,7 +49,7 @@ let _syncUnsub = null; // real-time listener unsubscribe handle
 
 
 // ── AUTH ────────────────────────────────────────────
-const ROLE_TABS = { admin: ['dashboard', 'calendario', 'videos', 'artes', 'demanda', 'usuarios'], designer: ['artes'], videomaker: ['videos'] };
+const ROLE_TABS = { admin: ['dashboard', 'calendario', 'videos', 'artes', 'demanda', 'usuarios'], designer: ['dashboard', 'calendario', 'artes'], videomaker: ['dashboard', 'calendario', 'videos'] };
 const ROLE_LABELS = { admin: '👑 Admin', designer: '🎨 Designer', videomaker: '🎬 Videomaker' };
 
 // ─── USERS (Firestore-backed, localStorage cache) ──
