@@ -447,7 +447,7 @@ function renderDemanda() {
     const mk = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
     const items = (data.demanda || []).filter(d => !d.month || d.month === mk);
     const tb = document.getElementById('demandaTbody'); if (!tb) return;
-    if (!items.length) { tb.innerHTML = '<tr><td colspan="10"><p class="empty-msg">Nenhuma demanda.</p></td></tr>'; return; }
+    if (!items.length) { tb.innerHTML = '<tr><td colspan="11"><p class="empty-msg">Nenhuma demanda.</p></td></tr>'; return; }
     tb.innerHTML = '';
     items.forEach((item, idx) => {
         const tr = document.createElement('tr');
@@ -458,7 +458,7 @@ function renderDemanda() {
         pc.appendChild(ps);
         let solDt = '—';
         if (item.solicitadoEm) { const [y, m, d] = item.solicitadoEm.split('-'); solDt = `${d}/${m}/${y}`; }
-        tr.innerHTML = `<td>${idx + 1}</td><td class="cell-date-sol">${solDt}</td><td><strong>${item.titulo}</strong></td><td>${item.categoria === 'video' ? '🎬' : item.categoria === 'arte' ? '🎨' : '✦'} ${item.categoria || '—'}</td>`;
+        tr.innerHTML = `<td>${idx + 1}</td><td class="cell-date-sol">${solDt}</td><td><strong>${item.titulo}</strong></td><td>${item.categoria === 'video' ? '🎬' : item.categoria === 'arte' ? '🎨' : '✦'} ${item.categoria || '—'}</td><td>${item.plataforma || '—'}</td>`;
         tr.appendChild(pc);
         const rd = document.createElement('td'); rd.textContent = item.responsavel || '—'; tr.appendChild(rd);
         const pd = document.createElement('td'); pd.textContent = item.prazo || '—'; tr.appendChild(pd);
@@ -545,7 +545,7 @@ function openDemandaModal(id) {
     const mk = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
     const item = id ? (data.demanda || []).find(d => d.id === id) : null; editTarget = id ? { section: 'demanda', id } : null;
     const body = document.getElementById('modalBody');
-    body.innerHTML = [fld('Título', 'titulo', 'text', { value: item?.titulo, ph: 'Ex: Post de recrutamento' }), fld('Categoria', 'categoria', 'select', { value: item?.categoria || 'video', options: [{ v: 'video', l: '🎬 Vídeo' }, { v: 'arte', l: '🎨 Arte' }, { v: 'outro', l: '✦ Outro' }] }), fld('Prioridade', 'prioridade', 'select', { value: item?.prioridade || 'media', options: [{ v: 'alta', l: '🔴 Alta' }, { v: 'media', l: '🟡 Média' }, { v: 'baixa', l: '🟢 Baixa' }] }), fld('Responsável', 'responsavel', 'text', { value: item?.responsavel, ph: 'Nome do responsável' }), fld('Prazo', 'prazo', 'date', { value: item?.prazo }), fld('Status', 'status', 'select', { value: item?.status || 'a-fazer', options: ST_OPTS }), fld('Observações', 'obs', 'textarea', { value: item?.obs })].join('');
+    body.innerHTML = [fld('Título', 'titulo', 'text', { value: item?.titulo, ph: 'Ex: Post de recrutamento' }), fld('Categoria', 'categoria', 'select', { value: item?.categoria || 'video', options: [{ v: 'video', l: '🎬 Vídeo' }, { v: 'arte', l: '🎨 Arte' }, { v: 'outro', l: '✦ Outro' }] }), fld('Plataforma', 'plataforma', 'select', { value: item?.plataforma || 'Instagram', options: [{ v: 'Instagram', l: '📸 Instagram' }, { v: 'TikTok', l: '🎵 TikTok' }, { v: 'YouTube', l: '▶️ YouTube' }, { v: 'Discord', l: '💬 Discord' }, { v: 'Twitter/X', l: '🐦 Twitter/X' }, { v: 'Todos', l: '🌐 Todos' }, { v: 'N/A', l: '— N/A' }] }), fld('Prioridade', 'prioridade', 'select', { value: item?.prioridade || 'media', options: [{ v: 'alta', l: '🔴 Alta' }, { v: 'media', l: '🟡 Média' }, { v: 'baixa', l: '🟢 Baixa' }] }), fld('Responsável', 'responsavel', 'text', { value: item?.responsavel, ph: 'Nome do responsável' }), fld('Prazo', 'prazo', 'date', { value: item?.prazo }), fld('Status', 'status', 'select', { value: item?.status || 'a-fazer', options: ST_OPTS }), fld('Observações', 'obs', 'textarea', { value: item?.obs })].join('');
     body.dataset.monthKey = mk;
     openModal(id ? '✏️ Editar Demanda' : '✦ Nova Demanda');
 }
