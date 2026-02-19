@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hype Roleplay | Planner Social Mídia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,500&family=DM+Sans:wght@300;400;500;600&family=Dancing+Script:wght@600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- ====== LOGIN SCREEN ====== -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="login-brand">
+                <span class="login-icon">👑</span>
+                <div>
+                    <span class="login-title">HYPE</span>
+                    <span class="login-sub">roleplay · planner</span>
+                </div>
+            </div>
+            <p class="login-welcome">Bem-vinda! Faça login para continuar.</p>
+            <div class="login-fields">
+                <div class="field-group">
+                    <label>Usuário</label>
+                    <input type="text" id="loginUser" class="field" placeholder="seu usuário" autocomplete="username" />
+                </div>
+                <div class="field-group">
+                    <label>Senha</label>
+                    <div class="pw-wrap">
+                        <input type="password" id="loginPass" class="field" placeholder="••••••••"
+                            autocomplete="current-password" />
+                        <button class="pw-toggle" id="pwToggle" type="button" title="Mostrar/ocultar senha">👁</button>
+                    </div>
+                </div>
+            </div>
+            <p class="login-error" id="loginError"></p>
+            <button class="btn-login" id="loginBtn">Entrar ✦</button>
+        </div>
+    </div>
+
+    <!-- ====== APP (hidden until logged in) ====== -->
+    <div id="appRoot" style="display:none; width:100%; height:100vh; display:none; flex-direction:row;">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">👑</div>
+                <div class="brand-text">
+                    <span class="brand-name">HYPE</span>
+                    <span class="brand-sub">roleplay</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item" data-tab="dashboard" data-roles="admin">
+                    <span class="nav-icon">✦</span><span class="nav-label">Dashboard</span>
+                </button>
+                <button class="nav-item" data-tab="calendario" data-roles="admin">
+                    <span class="nav-icon">◈</span><span class="nav-label">Calendário</span>
+                </button>
+                <button class="nav-item" data-tab="videos" data-roles="admin,videomaker">
+                    <span class="nav-icon">▷</span><span class="nav-label">Vídeos</span>
+                </button>
+                <button class="nav-item" data-tab="artes" data-roles="admin,designer">
+                    <span class="nav-icon">✧</span><span class="nav-label">Artes</span>
+                </button>
+                <button class="nav-item" data-tab="demanda" data-roles="admin">
+                    <span class="nav-icon">◉</span><span class="nav-label">Demanda</span>
+                </button>
+                <button class="nav-item" data-tab="usuarios" data-roles="admin">
+                    <span class="nav-icon">⚙</span><span class="nav-label">Usuários</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sf-user">
+                    <span class="sf-avatar" id="sfAvatar">?</span>
+                    <div>
+                        <div class="sf-username" id="sfUsername">—</div>
+                        <div class="sf-role" id="sfRole">—</div>
+                    </div>
+                </div>
+                <div class="sf-tags">
+                    <span class="sf-tag">Social Mídia</span>
+                    <span class="sf-tag pink">Planner</span>
+                </div>
+                <div class="sf-date" id="currentDate"></div>
+                <button class="btn-logout" id="logoutBtn">↩ Sair</button>
+            </div>
+        </aside>
+
+        <!-- MAIN AREA -->
+        <div class="app-body">
+
+            <!-- TOP BAR -->
+            <header class="topbar">
+                <div class="topbar-title" id="topbarTitle">Dashboard</div>
+                <div class="month-nav">
+                    <button class="btn-nav" id="prevMonth">‹</button>
+                    <span class="month-label" id="monthLabel"></span>
+                    <button class="btn-nav" id="nextMonth">›</button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <main class="content">
+
+                <!-- DASHBOARD -->
+                <section id="tab-dashboard" class="panel active">
+                    <div class="hero-strip">
+                        <div class="hero-text">
+                            <p class="hero-eyebrow">✦ Bem-vinda ao Planner</p>
+                            <h1 class="hero-title">Hype <em>Roleplay</em></h1>
+                        </div>
+                        <div class="hero-deco">✦</div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="scard"><span class="scard-num" id="stat-videos">0</span><span
+                                class="scard-label">Vídeos</span>
+                            <div class="scard-bar">
+                                <div id="bar-videos" class="scard-fill" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div class="scard"><span class="scard-num" id="stat-artes">0</span><span
+                                class="scard-label">Artes</span>
+                            <div class="scard-bar">
+                                <div id="bar-artes" class="scard-fill" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div class="scard green"><span class="scard-num" id="stat-done">0</span><span
+                                class="scard-label">Concluídos</span>
+                            <div class="scard-bar">
+                                <div id="bar-done" class="scard-fill green" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div class="scard yellow"><span class="scard-num" id="stat-progress">0</span><span
+                                class="scard-label">Andamento</span>
+                            <div class="scard-bar">
+                                <div id="bar-progress" class="scard-fill yellow" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div class="scard red"><span class="scard-num" id="stat-todo">0</span><span
+                                class="scard-label">A Fazer</span>
+                            <div class="scard-bar">
+                                <div id="bar-todo" class="scard-fill red" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div class="scard purple"><span class="scard-num" id="stat-pub">0</span><span
+                                class="scard-label">Publicados</span>
+                            <div class="scard-bar">
+                                <div id="bar-pub" class="scard-fill purple" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-block">
+                        <div class="block-header">
+                            <h2 class="block-title">✦ Tarefas Recentes</h2>
+                        </div>
+                        <div class="recent-list" id="recentList">
+                            <p class="empty-msg">Nenhuma tarefa ainda.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CALENDÁRIO -->
+                <section id="tab-calendario" class="panel">
+                    <div class="section-block">
+                        <div class="block-header">
+                            <h2 class="block-title" id="calTitle"></h2>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+                    <div class="event-panel" id="eventDetailPanel" style="display:none">
+                        <div class="ep-header">
+                            <h3 id="panelDate"></h3>
+                            <button class="x-btn" id="closePanelBtn">×</button>
+                        </div>
+                        <div id="panelEvents" class="ep-events"></div>
+                        <div class="ep-add">
+                            <input class="field" type="text" id="newEventTitle" placeholder="Título do evento…" />
+                            <select class="field sel" id="newEventType">
+                                <option value="video">🎬 Vídeo</option>
+                                <option value="arte">🎨 Arte</option>
+                                <option value="post">📸 Post</option>
+                                <option value="live">📡 Live</option>
+                                <option value="outro">✦ Outro</option>
+                            </select>
+                            <button class="btn-ghost" id="addEventBtn">+ Adicionar</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VÍDEOS -->
+                <section id="tab-videos" class="panel">
+                    <div class="section-block">
+                        <div class="block-header">
+                            <h2 class="block-title">▷ Controle de Vídeos</h2>
+                            <button class="btn-primary admin-only" id="addVideoBtn">+ Novo Vídeo</button>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table class="dtable">
+                                <thead>
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Tipo</th>
+                                        <th>Responsável</th>
+                                        <th>Data</th>
+                                        <th>Status</th>
+                                        <th>Plataforma</th>
+                                        <th class="admin-only">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="videosTbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ARTES -->
+                <section id="tab-artes" class="panel">
+                    <div class="section-block">
+                        <div class="block-header">
+                            <h2 class="block-title">✧ Controle de Artes</h2>
+                            <button class="btn-primary admin-only" id="addArteBtn">+ Nova Arte</button>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table class="dtable">
+                                <thead>
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Tipo</th>
+                                        <th>Responsável</th>
+                                        <th>Data</th>
+                                        <th>Status</th>
+                                        <th>Formato</th>
+                                        <th class="admin-only">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="artesTbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DEMANDA -->
+                <section id="tab-demanda" class="panel">
+                    <div class="section-block">
+                        <div class="block-header">
+                            <h2 class="block-title">◉ Demanda — <span id="demandaMonthLabel"></span></h2>
+                            <button class="btn-primary" id="addDemandaBtn">+ Nova Demanda</button>
+                        </div>
+                        <div class="meta-bar">
+                            <div class="meta-item"><label>Meta de Vídeos</label><input type="number" id="metaVideos"
+                                    class="mini-input" placeholder="Ex: 8" min="0" /></div>
+                            <div class="meta-item"><label>Meta de Artes</label><input type="number" id="metaArtes"
+                                    class="mini-input" placeholder="Ex: 20" min="0" /></div>
+                            <button class="btn-ghost green" id="saveMetaBtn">💾 Salvar Metas</button>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table class="dtable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Solicitado em</th>
+                                        <th>Título</th>
+                                        <th>Categoria</th>
+                                        <th>Prioridade</th>
+                                        <th>Responsável</th>
+                                        <th>Prazo</th>
+                                        <th>Status</th>
+                                        <th>Obs</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="demandaTbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- USUÁRIOS (admin only) -->
+                <section id="tab-usuarios" class="panel">
+                    <div class="section-block">
+                        <div class="block-header">
+                            <h2 class="block-title">⚙ Gerenciar Usuários</h2>
+                            <button class="btn-primary" id="addUserBtn">+ Novo Usuário</button>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table class="dtable">
+                                <thead>
+                                    <tr>
+                                        <th>Usuário</th>
+                                        <th>Role</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ====== MODAL ====== -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none">
+        <div class="modal">
+            <div class="modal-top">
+                <h3 id="modalTitle">Nova Tarefa</h3>
+                <button class="x-btn" id="modalCloseBtn">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-foot">
+                <button class="btn-ghost" id="modalCancelBtn">Cancelar</button>
+                <button class="btn-primary" id="modalConfirmBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
