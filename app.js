@@ -461,10 +461,33 @@ function renderCalEvents(dk) {
         row.appendChild(top);
 
         if (ev.obs) {
+            const obsContainer = document.createElement('div');
+            obsContainer.style.display = 'flex'; obsContainer.style.alignItems = 'flex-start'; obsContainer.style.gap = '6px'; obsContainer.style.marginTop = '4px'; obsContainer.style.width = '100%';
+
+            const obsIcon = document.createElement('span');
+            obsIcon.textContent = '✏️';
+            obsIcon.style.fontSize = '10px'; obsIcon.style.opacity = '0.5'; obsIcon.style.marginTop = '2px'; obsIcon.style.cursor = 'help';
+            obsIcon.title = 'Clique no texto para editar';
+
             const obsDiv = document.createElement('div');
-            obsDiv.style.fontSize = '11px'; obsDiv.style.color = 'var(--wm)'; obsDiv.style.marginTop = '4px'; obsDiv.style.fontStyle = 'italic'; obsDiv.style.paddingLeft = '5px';
+            obsDiv.style.fontSize = '11px'; obsDiv.style.color = 'var(--wm)'; obsDiv.style.fontStyle = 'italic'; obsDiv.style.flex = '1';
+            obsDiv.style.cursor = 'text'; obsDiv.style.outline = 'none'; obsDiv.style.padding = '2px 4px'; obsDiv.style.borderRadius = '4px'; obsDiv.style.border = '1px solid transparent';
+            obsDiv.style.transition = 'border-color 0.2s, background 0.2s';
+            obsDiv.contentEditable = 'true';
             obsDiv.textContent = ev.obs;
-            row.appendChild(obsDiv);
+
+            obsDiv.addEventListener('focus', () => { obsDiv.style.borderColor = 'rgba(196,181,253,0.3)'; obsDiv.style.background = 'rgba(0,0,0,0.3)'; });
+            obsDiv.addEventListener('blur', () => {
+                obsDiv.style.borderColor = 'transparent'; obsDiv.style.background = 'transparent';
+                if (obsDiv.textContent.trim() !== ev.obs) {
+                    ev.obs = obsDiv.textContent.trim();
+                    saveData(); showNotif('Observação salva ✦');
+                }
+            });
+
+            obsContainer.appendChild(obsIcon);
+            obsContainer.appendChild(obsDiv);
+            row.appendChild(obsContainer);
         }
 
         top.querySelector('.ep-del').addEventListener('click', () => {
