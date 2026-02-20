@@ -938,11 +938,14 @@ body {
 
 .cal-header-day {
     text-align: center;
-    font-size: 13px;
-    font-family: 'Dancing Script', cursive;
-    font-weight: 600;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     color: var(--wm);
-    padding: 6px 0;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(250, 245, 255, .04);
 }
 
 .cal-header-day:nth-child(1),
@@ -951,23 +954,26 @@ body {
 }
 
 .cal-day {
-    min-height: 86px;
-    background: rgba(250, 245, 255, .025);
-    border: 1px solid rgba(250, 245, 255, .05);
+    min-height: 110px;
+    height: 110px;
+    background: rgba(250, 245, 255, .02);
+    border: 1px solid rgba(250, 245, 255, .04);
     border-radius: var(--rs);
-    padding: 7px;
+    padding: 8px 10px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    transition: border-color .2s, background .2s, transform .2s;
+    gap: 4px;
+    transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
+    overflow: hidden;
+    position: relative;
 }
 
 .cal-day:hover {
-    border-color: rgba(244, 114, 182, .28);
-    background: rgba(219, 39, 119, .06);
-    transform: scale(1.015);
-    position: relative;
+    border-color: rgba(244, 114, 182, .3);
+    background: rgba(219, 39, 119, .08);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     z-index: 2;
 }
 
@@ -1001,21 +1007,24 @@ body {
 }
 
 .chip {
-    font-size: 9.5px;
-    padding: 3px 7px 3px 8px;
-    border-radius: 5px;
+    font-size: 9px;
+    padding: 3px 6px;
+    border-radius: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 600;
-    border-left: 2px solid transparent;
-    letter-spacing: .2px;
-    line-height: 1.4;
+    border-left: 3px solid transparent;
+    letter-spacing: .3px;
+    line-height: 1.2;
     transition: opacity .15s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .chip:hover {
-    opacity: .8;
+    opacity: .9;
 }
 
 .chip-video {
