@@ -1576,8 +1576,4 @@ body.role-admin td.admin-only {
     display: table-cell;
 }
 
-/* non-clickable badge for non-admin */
-body:not(.role-admin) .badge {
-    cursor: default;
-    pointer-events: none;
-}
+/* non-admins can still click badges to update their own status */
