@@ -49,7 +49,7 @@ let _syncUnsub = null; // real-time listener unsubscribe handle
 
 
 // ── AUTH ────────────────────────────────────────────
-const ROLE_TABS = { admin: ['dashboard', 'calendario', 'videos', 'artes', 'demanda', 'usuarios'], designer: ['dashboard', 'calendario', 'artes'], videomaker: ['dashboard', 'calendario', 'videos'] };
+const ROLE_TABS = { admin: ['dashboard', 'calendario', 'videos', 'artes', 'demanda', 'usuarios'], designer: ['dashboard', 'calendario', 'artes', 'demanda'], videomaker: ['dashboard', 'calendario', 'videos', 'demanda'] };
 const ROLE_LABELS = { admin: '👑 Admin', designer: '🎨 Designer', videomaker: '🎬 Videomaker' };
 
 // ─── USERS (Firestore-backed, localStorage cache) ──
@@ -340,10 +340,19 @@ function renderDashboard() {
     list.innerHTML = '';
     recent.forEach(item => {
         const div = document.createElement('div'); div.className = 'recent-item';
+        div.style.cursor = 'pointer'; // Make it look clickable
         div.innerHTML = `<span class="recent-item-icon">${item.categoria === 'video' ? '🎬' : item.categoria === 'arte' ? '🎨' : '✦'}</span>
       <div class="recent-item-info"><div class="recent-item-title">${item.titulo}</div>
       <div class="recent-item-sub">${item.responsavel || 'Sem responsável'} · ${item.prazo || 'Sem prazo'}</div></div>`;
         div.appendChild(makeBadge('demanda', item.id, item.status));
+
+        // Add click listener to open details (skipping the badge click)
+        div.addEventListener('click', (e) => {
+            // If clicked on badge, don't open modal (badge cycles status)
+            if (e.target.closest('.badge')) return;
+            openDemandaModal(item.id);
+        });
+
         list.appendChild(div);
     });
 }
@@ -415,13 +424,32 @@ function renderVideos() {
     list.forEach(item => {
         const tr = document.createElement('tr');
         const sc = document.createElement('td'); sc.appendChild(makeBadge('videos', item.id, item.status));
-        tr.innerHTML = `<td><strong>${item.titulo}</strong></td><td>${item.tipo || '—'}</td><td>${item.responsavel || '—'}</td><td>${item.date || '—'}</td>`;
+
+        // Make title clickable
+        const titleTd = document.createElement('td');
+        titleTd.innerHTML = `<strong>${item.titulo}</strong>`;
+        titleTd.style.cursor = 'pointer';
+        titleTd.title = 'Ver detalhes';
+        titleTd.addEventListener('click', () => openVideoModal(item.id));
+
+        tr.appendChild(titleTd);
+        tr.innerHTML += `<td>${item.tipo || '—'}</td><td>${item.responsavel || '—'}</td><td>${item.date || '—'}</td>`;
         tr.appendChild(sc);
         const pd = document.createElement('td'); pd.textContent = item.plataforma || '—'; tr.appendChild(pd);
-        const ac = document.createElement('td'); ac.className = 'admin-only';
-        ac.innerHTML = '<button class="btn-tbl">✏️</button><button class="btn-tbl d">🗑️</button>';
-        ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openVideoModal(item.id));
-        ac.querySelectorAll('.btn-tbl')[1].addEventListener('click', () => delItem('videos', item.id));
+        const ac = document.createElement('td');
+
+        // Check if admin
+        const sess = sessionStorage.getItem('hype_session');
+        const role = sess ? JSON.parse(sess).role : 'designer';
+        if (role === 'admin') {
+            ac.innerHTML = '<button class="btn-tbl">✏️</button><button class="btn-tbl d">🗑️</button>';
+            ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openVideoModal(item.id));
+            ac.querySelectorAll('.btn-tbl')[1].addEventListener('click', () => delItem('videos', item.id));
+        } else {
+            ac.innerHTML = '<button class="btn-tbl">👁️</button>';
+            ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openVideoModal(item.id));
+        }
+
         tr.appendChild(ac); tb.appendChild(tr);
     });
 }
@@ -433,13 +461,32 @@ function renderArtes() {
     list.forEach(item => {
         const tr = document.createElement('tr');
         const sc = document.createElement('td'); sc.appendChild(makeBadge('artes', item.id, item.status));
-        tr.innerHTML = `<td><strong>${item.titulo}</strong></td><td>${item.tipo || '—'}</td><td>${item.responsavel || '—'}</td><td>${item.date || '—'}</td>`;
+
+        // Make title clickable
+        const titleTd = document.createElement('td');
+        titleTd.innerHTML = `<strong>${item.titulo}</strong>`;
+        titleTd.style.cursor = 'pointer';
+        titleTd.title = 'Ver detalhes';
+        titleTd.addEventListener('click', () => openArteModal(item.id));
+
+        tr.appendChild(titleTd);
+        tr.innerHTML += `<td>${item.tipo || '—'}</td><td>${item.responsavel || '—'}</td><td>${item.date || '—'}</td>`;
         tr.appendChild(sc);
         const fd = document.createElement('td'); fd.textContent = item.formato || '—'; tr.appendChild(fd);
-        const ac = document.createElement('td'); ac.className = 'admin-only';
-        ac.innerHTML = '<button class="btn-tbl">✏️</button><button class="btn-tbl d">🗑️</button>';
-        ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openArteModal(item.id));
-        ac.querySelectorAll('.btn-tbl')[1].addEventListener('click', () => delItem('artes', item.id));
+        const ac = document.createElement('td');
+
+        // Check if admin
+        const sess = sessionStorage.getItem('hype_session');
+        const role = sess ? JSON.parse(sess).role : 'designer';
+        if (role === 'admin') {
+            ac.innerHTML = '<button class="btn-tbl">✏️</button><button class="btn-tbl d">🗑️</button>';
+            ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openArteModal(item.id));
+            ac.querySelectorAll('.btn-tbl')[1].addEventListener('click', () => delItem('artes', item.id));
+        } else {
+            ac.innerHTML = '<button class="btn-tbl">👁️</button>';
+            ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openArteModal(item.id));
+        }
+
         tr.appendChild(ac); tb.appendChild(tr);
     });
 }
@@ -458,16 +505,38 @@ function renderDemanda() {
         pc.appendChild(ps);
         let solDt = '—';
         if (item.solicitadoEm) { const [y, m, d] = item.solicitadoEm.split('-'); solDt = `${d}/${m}/${y}`; }
-        tr.innerHTML = `<td>${idx + 1}</td><td class="cell-date-sol">${solDt}</td><td><strong>${item.titulo}</strong></td><td>${item.categoria === 'video' ? '🎬' : item.categoria === 'arte' ? '🎨' : '✦'} ${item.categoria || '—'}</td><td>${item.plataforma || '—'}</td>`;
+
+        // Structure table row
+        tr.innerHTML = `<td>${idx + 1}</td><td class="cell-date-sol">${solDt}</td>`;
+
+        // Clickable Title
+        const titleTd = document.createElement('td');
+        titleTd.innerHTML = `<strong>${item.titulo}</strong>`;
+        titleTd.style.cursor = 'pointer';
+        titleTd.title = 'Ver detalhes';
+        titleTd.addEventListener('click', () => openDemandaModal(item.id));
+        tr.appendChild(titleTd);
+
+        tr.innerHTML += `<td>${item.categoria === 'video' ? '🎬' : item.categoria === 'arte' ? '🎨' : '✦'} ${item.categoria || '—'}</td><td>${item.plataforma || '—'}</td>`;
         tr.appendChild(pc);
         const rd = document.createElement('td'); rd.textContent = item.responsavel || '—'; tr.appendChild(rd);
         const pd = document.createElement('td'); pd.textContent = item.prazo || '—'; tr.appendChild(pd);
         tr.appendChild(sc);
         const od = document.createElement('td'); od.textContent = item.obs || '—'; od.style.cssText = 'max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'; tr.appendChild(od);
         const ac = document.createElement('td');
-        ac.innerHTML = '<button class="btn-tbl">✏️</button><button class="btn-tbl d">🗑️</button>';
-        ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openDemandaModal(item.id));
-        ac.querySelectorAll('.btn-tbl')[1].addEventListener('click', () => delItem('demanda', item.id));
+
+        // Check if admin
+        const sess = sessionStorage.getItem('hype_session');
+        const role = sess ? JSON.parse(sess).role : 'designer';
+        if (role === 'admin') {
+            ac.innerHTML = '<button class="btn-tbl">✏️</button><button class="btn-tbl d">🗑️</button>';
+            ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openDemandaModal(item.id));
+            ac.querySelectorAll('.btn-tbl')[1].addEventListener('click', () => delItem('demanda', item.id));
+        } else {
+            ac.innerHTML = '<button class="btn-tbl">👁️</button>';
+            ac.querySelectorAll('.btn-tbl')[0].addEventListener('click', () => openDemandaModal(item.id));
+        }
+
         tr.appendChild(ac); tb.appendChild(tr);
     });
 }
@@ -533,12 +602,40 @@ const ST_OPTS = statuses.map(s => ({ v: s, l: statusLabels[s] }));
 function openVideoModal(id) {
     modalSection = 'videos'; const item = id ? (data.videos || []).find(v => v.id === id) : null; editTarget = id ? { section: 'videos', id } : null;
     document.getElementById('modalBody').innerHTML = [fld('Título', 'titulo', 'text', { value: item?.titulo, ph: 'Ex: Apresentação do servidor' }), fld('Tipo', 'tipo', 'select', { value: item?.tipo || 'Reels', options: [{ v: 'Reels', l: '🎞️ Reels' }, { v: 'YouTube', l: '▶️ YouTube' }, { v: 'TikTok', l: '🎵 TikTok' }, { v: 'Stories', l: '📱 Stories' }, { v: 'Live', l: '📡 Live' }, { v: 'Cortado', l: '✂️ Cortado' }] }), fld('Responsável', 'responsavel', 'text', { value: item?.responsavel, ph: 'Nome do editor' }), fld('Data Prevista', 'date', 'date', { value: item?.date }), fld('Plataforma', 'plataforma', 'select', { value: item?.plataforma || 'Instagram', options: [{ v: 'Instagram', l: '📸 Instagram' }, { v: 'YouTube', l: '▶️ YouTube' }, { v: 'TikTok', l: '🎵 TikTok' }, { v: 'Discord', l: '💬 Discord' }, { v: 'Todos', l: '🌐 Todos' }] }), fld('Status', 'status', 'select', { value: item?.status || 'a-fazer', options: ST_OPTS }), fld('Observações', 'obs', 'textarea', { value: item?.obs })].join('');
-    openModal(id ? '✏️ Editar Vídeo' : '🎬 Novo Vídeo');
+
+    // Read-only for non-admins
+    const sess = sessionStorage.getItem('hype_session');
+    const role = sess ? JSON.parse(sess).role : 'designer';
+    if (role !== 'admin') {
+        const body = document.getElementById('modalBody');
+        body.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+        document.getElementById('modalConfirmBtn').style.display = 'none';
+        document.getElementById('modalCancelBtn').textContent = 'Fechar';
+    } else {
+        document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalCancelBtn').textContent = 'Cancelar';
+    }
+
+    openModal(id ? (role === 'admin' ? '✏️ Editar Vídeo' : '👁️ Visualizar Vídeo') : '🎬 Novo Vídeo');
 }
 function openArteModal(id) {
     modalSection = 'artes'; const item = id ? (data.artes || []).find(a => a.id === id) : null; editTarget = id ? { section: 'artes', id } : null;
     document.getElementById('modalBody').innerHTML = [fld('Título', 'titulo', 'text', { value: item?.titulo, ph: 'Ex: Banner do evento' }), fld('Tipo', 'tipo', 'select', { value: item?.tipo || 'Post Feed', options: [{ v: 'Post Feed', l: '🖼️ Post Feed' }, { v: 'Stories', l: '📱 Stories' }, { v: 'Banner', l: '🎨 Banner' }, { v: 'Logo', l: '✨ Logo' }, { v: 'Thumbnail', l: '🖥️ Thumbnail' }, { v: 'Flyer', l: '📄 Flyer' }] }), fld('Responsável', 'responsavel', 'text', { value: item?.responsavel, ph: 'Nome do designer' }), fld('Data Prevista', 'date', 'date', { value: item?.date }), fld('Formato', 'formato', 'select', { value: item?.formato || '1080x1080', options: [{ v: '1080x1080', l: '1080×1080 (Feed)' }, { v: '1080x1920', l: '1080×1920 (Stories)' }, { v: '1920x1080', l: '1920×1080 (Banner)' }, { v: '1280x720', l: '1280×720 (Thumb)' }, { v: 'Outro', l: 'Outro' }] }), fld('Status', 'status', 'select', { value: item?.status || 'a-fazer', options: ST_OPTS }), fld('Observações', 'obs', 'textarea', { value: item?.obs })].join('');
-    openModal(id ? '✏️ Editar Arte' : '🎨 Nova Arte');
+
+    // Read-only for non-admins
+    const sess = sessionStorage.getItem('hype_session');
+    const role = sess ? JSON.parse(sess).role : 'designer';
+    if (role !== 'admin') {
+        const body = document.getElementById('modalBody');
+        body.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+        document.getElementById('modalConfirmBtn').style.display = 'none';
+        document.getElementById('modalCancelBtn').textContent = 'Fechar';
+    } else {
+        document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalCancelBtn').textContent = 'Cancelar';
+    }
+
+    openModal(id ? (role === 'admin' ? '✏️ Editar Arte' : '👁️ Visualizar Arte') : '🎨 Nova Arte');
 }
 function openDemandaModal(id) {
     modalSection = 'demanda';
@@ -547,7 +644,20 @@ function openDemandaModal(id) {
     const body = document.getElementById('modalBody');
     body.innerHTML = [fld('Título', 'titulo', 'text', { value: item?.titulo, ph: 'Ex: Post de recrutamento' }), fld('Categoria', 'categoria', 'select', { value: item?.categoria || 'video', options: [{ v: 'video', l: '🎬 Vídeo' }, { v: 'arte', l: '🎨 Arte' }, { v: 'outro', l: '✦ Outro' }] }), fld('Plataforma', 'plataforma', 'select', { value: item?.plataforma || 'Instagram', options: [{ v: 'Instagram', l: '📸 Instagram' }, { v: 'TikTok', l: '🎵 TikTok' }, { v: 'YouTube', l: '▶️ YouTube' }, { v: 'Discord', l: '💬 Discord' }, { v: 'Twitter/X', l: '🐦 Twitter/X' }, { v: 'Todos', l: '🌐 Todos' }, { v: 'N/A', l: '— N/A' }] }), fld('Prioridade', 'prioridade', 'select', { value: item?.prioridade || 'media', options: [{ v: 'alta', l: '🔴 Alta' }, { v: 'media', l: '🟡 Média' }, { v: 'baixa', l: '🟢 Baixa' }] }), fld('Responsável', 'responsavel', 'text', { value: item?.responsavel, ph: 'Nome do responsável' }), fld('Prazo', 'prazo', 'date', { value: item?.prazo }), fld('Status', 'status', 'select', { value: item?.status || 'a-fazer', options: ST_OPTS }), fld('Observações', 'obs', 'textarea', { value: item?.obs })].join('');
     body.dataset.monthKey = mk;
-    openModal(id ? '✏️ Editar Demanda' : '✦ Nova Demanda');
+
+    // Read-only for non-admins
+    const sess = sessionStorage.getItem('hype_session');
+    const role = sess ? JSON.parse(sess).role : 'designer';
+    if (role !== 'admin') {
+        body.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+        document.getElementById('modalConfirmBtn').style.display = 'none';
+        document.getElementById('modalCancelBtn').textContent = 'Fechar';
+    } else {
+        document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalCancelBtn').textContent = 'Cancelar';
+    }
+
+    openModal(id ? (role === 'admin' ? '✏️ Editar Demanda' : '👁️ Visualizar Demanda') : '✦ Nova Demanda');
 }
 function openUserModal(idx) {
     modalSection = 'usuario';
