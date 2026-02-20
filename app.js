@@ -467,10 +467,10 @@ function renderVideos() {
 
         // Make title clickable
         const titleTd = document.createElement('td');
-        titleTd.innerHTML = `<strong>${item.titulo}</strong>`;
+        titleTd.innerHTML = `<strong>${item.titulo}</strong>${item.fileUrl ? ` <a href="${item.fileUrl}" target="_blank" title="Ver arquivo" style="font-size:13px;text-decoration:none">📎</a>` : ''}`;
         titleTd.style.cursor = 'pointer';
         titleTd.title = 'Ver detalhes';
-        titleTd.addEventListener('click', () => openVideoModal(item.id));
+        titleTd.addEventListener('click', (e) => { if (e.target.tagName === 'A') return; openVideoModal(item.id); });
 
         tr.appendChild(titleTd);
         tr.innerHTML += `<td>${item.tipo || '—'}</td><td>${item.responsavel || '—'}</td><td>${item.date || '—'}</td>`;
@@ -504,10 +504,10 @@ function renderArtes() {
 
         // Make title clickable
         const titleTd = document.createElement('td');
-        titleTd.innerHTML = `<strong>${item.titulo}</strong>`;
+        titleTd.innerHTML = `<strong>${item.titulo}</strong>${item.fileUrl ? ` <a href="${item.fileUrl}" target="_blank" title="Ver arquivo" style="font-size:13px;text-decoration:none">📎</a>` : ''}`;
         titleTd.style.cursor = 'pointer';
         titleTd.title = 'Ver detalhes';
-        titleTd.addEventListener('click', () => openArteModal(item.id));
+        titleTd.addEventListener('click', (e) => { if (e.target.tagName === 'A') return; openArteModal(item.id); });
 
         tr.appendChild(titleTd);
         tr.innerHTML += `<td>${item.tipo || '—'}</td><td>${item.responsavel || '—'}</td><td>${item.date || '—'}</td>`;
