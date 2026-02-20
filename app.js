@@ -166,7 +166,7 @@ function applyLogin(username, role) {
         const tt = document.getElementById('topbarTitle'); if (tt) tt.textContent = topTitles[firstTab] || '';
     }
     const mnav = document.querySelector('.month-nav');
-    if (mnav) mnav.style.display = 'flex';
+    if (mnav) mnav.style.display = (firstTab === 'calendario' || firstTab === 'demanda') ? 'flex' : 'none';
 
     updateDate(); updateMonthLabel();
 
@@ -281,6 +281,8 @@ window.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active');
             document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
             const el = document.getElementById('topbarTitle'); if (el) el.textContent = topTitles[btn.dataset.tab] || '';
+            const mnav = document.querySelector('.month-nav');
+            if (mnav) mnav.style.display = (btn.dataset.tab === 'calendario' || btn.dataset.tab === 'demanda') ? 'flex' : 'none';
         });
     });
 
