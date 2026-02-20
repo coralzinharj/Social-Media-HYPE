@@ -44,7 +44,7 @@ function addFileUploadSection(item, accept = 'image/*,video/*,.pdf') {
         <button id="removeFileBtn" class="btn-ghost" style="color:#e05;margin-left:8px;font-size:12px">🗑️ Remover</button>
     </div>` : ''}
     <input type="file" id="fileUploadInput" accept="${accept}" style="margin-top:4px;color:#ccc;font-size:13px">
-    <small style="color:#888;margin-top:4px;display:block">Imagens, vídeos ou PDF • Max 100MB</small>`;
+    <small style="color:#888;margin-top:4px;display:block">Imagens, vídeos ou PDF</small>`;
     body.appendChild(sec);
 
     const removeBtn = document.getElementById('removeFileBtn');
