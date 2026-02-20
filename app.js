@@ -57,7 +57,44 @@ function addFileUploadSection(item, accept = 'image/*,video/*,.pdf') {
     }
 }
 
+function addCreativeIdeasSection(item) {
+    const body = document.getElementById('modalBody');
+    const sec = document.createElement('div');
+    sec.className = 'field-group';
+    sec.id = 'creativeIdeasSection';
 
+    // Build existing reference images HTML
+    const refImgs = item?.referenciaImgs || [];
+    const imgsHtml = refImgs.map((url, i) => `
+        <div id="refImg_${i}" style="display:inline-flex;align-items:center;gap:6px;margin:4px 6px 4px 0;background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px">
+            <a href="${url}" target="_blank"><img src="${url}" style="height:40px;width:40px;object-fit:cover;border-radius:6px;vertical-align:middle" onerror="this.style.display='none'"></a>
+            <button class="btn-ghost remove-ref-img" data-idx="${i}" style="font-size:11px;color:#e05;padding:2px 6px">✕</button>
+        </div>`).join('');
+
+    sec.innerHTML = `<label>💡 Ideias Criativas & Referências</label>
+    <div style="margin-bottom:8px">
+        <div id="refImgsList" style="margin-bottom:6px">${imgsHtml}</div>
+        <input type="file" id="refImgInput" accept="image/*" multiple style="color:#ccc;font-size:13px">
+        <small style="color:#888;display:block;margin-top:3px">Adicione imagens de referência (pode selecionar várias)</small>
+    </div>
+    <div style="margin-top:8px">
+        <label style="font-size:12px;color:#aaa;font-weight:500">🔗 Links de Referência</label>
+        <textarea id="referenciaLinks" class="field" placeholder="Cole URLs de referência, uma por linha" style="min-height:70px;resize:vertical;margin-top:4px">${(item?.referenciaLinks || []).join('\n')}</textarea>
+    </div>`;
+    body.appendChild(sec);
+
+    // Remove existing reference image
+    sec.querySelectorAll('.remove-ref-img').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.idx);
+            btn.closest('[id^="refImg_"]').remove();
+            btn.dataset.removed = 'true';
+            if (!window._removedRefImgs) window._removedRefImgs = new Set();
+            window._removedRefImgs.add(idx);
+        });
+    });
+    window._removedRefImgs = new Set();
+}
 
 // ── PARTICLES ──────────────────────────────────────
 (function () {
@@ -715,6 +752,7 @@ function openDemandaModal(id) {
     }
 
     addFileUploadSection(item, 'image/*,video/*,.pdf');
+    addCreativeIdeasSection(item);
     openModal(id ? (role === 'admin' ? '✏️ Editar Demanda' : '👁️ Visualizar Demanda') : '✦ Nova Demanda');
 }
 function openUserModal(idx) {
@@ -767,6 +805,35 @@ async function saveModal() {
         btn.textContent = origText;
     }
 
+    // Handle reference images upload (demanda only)
+    let newRefImgUrls = [];
+    const refImgInput = document.getElementById('refImgInput');
+    if (refImgInput?.files?.length > 0) {
+        const btn = document.getElementById('modalConfirmBtn');
+        const origText = btn.textContent;
+        btn.textContent = '⏳ Enviando referências...';
+        btn.disabled = true;
+        try {
+            for (const file of refImgInput.files) {
+                const url = await uploadToCloudinary(file);
+                newRefImgUrls.push(url);
+            }
+        } catch (e) {
+            showNotif('Erro ao enviar imagem de referência.');
+            btn.textContent = origText;
+            btn.disabled = false;
+            return;
+        }
+        btn.disabled = false;
+        btn.textContent = origText;
+    }
+
+    // Gather reference links
+    const referenciaLinksEl = document.getElementById('referenciaLinks');
+    const referenciaLinks = referenciaLinksEl
+        ? referenciaLinksEl.value.split('\n').map(l => l.trim()).filter(l => l.length > 0)
+        : null;
+
     // Check admin role — non-admins only save status + file
     const _sess = sessionStorage.getItem('hype_session');
     const _role = _sess ? JSON.parse(_sess).role : 'designer';
@@ -780,6 +847,16 @@ async function saveModal() {
                 arr[idx].status = vals.status;
                 if (uploadedFileUrl) arr[idx].fileUrl = uploadedFileUrl;
                 if (removeFile) delete arr[idx].fileUrl;
+                // Save reference images and links (non-admin can also add refs)
+                if (newRefImgUrls.length > 0) {
+                    const existing = arr[idx].referenciaImgs || [];
+                    const kept = existing.filter((_, i) => !window._removedRefImgs?.has(i));
+                    arr[idx].referenciaImgs = [...kept, ...newRefImgUrls];
+                } else if (window._removedRefImgs?.size > 0) {
+                    const existing = arr[idx].referenciaImgs || [];
+                    arr[idx].referenciaImgs = existing.filter((_, i) => !window._removedRefImgs.has(i));
+                }
+                if (referenciaLinks !== null) arr[idx].referenciaLinks = referenciaLinks;
             }
         }
         saveData();
@@ -801,6 +878,16 @@ async function saveModal() {
             arr[idx] = { ...arr[idx], ...vals };
             if (uploadedFileUrl) arr[idx].fileUrl = uploadedFileUrl;
             if (removeFile) delete arr[idx].fileUrl;
+            // Save reference images and links (admin)
+            if (newRefImgUrls.length > 0) {
+                const existing = arr[idx].referenciaImgs || [];
+                const kept = existing.filter((_, i) => !window._removedRefImgs?.has(i));
+                arr[idx].referenciaImgs = [...kept, ...newRefImgUrls];
+            } else if (window._removedRefImgs?.size > 0) {
+                const existing = arr[idx].referenciaImgs || [];
+                arr[idx].referenciaImgs = existing.filter((_, i) => !window._removedRefImgs.has(i));
+            }
+            if (referenciaLinks !== null) arr[idx].referenciaLinks = referenciaLinks;
             if (editTarget.section === 'demanda') {
                 const linked = arr[idx].linkedId;
                 if (linked) {
