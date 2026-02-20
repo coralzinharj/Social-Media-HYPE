@@ -549,12 +549,12 @@ function renderDemanda() {
         // Structure table row
         tr.innerHTML = `<td>${idx + 1}</td><td class="cell-date-sol">${solDt}</td>`;
 
-        // Clickable Title
+        // Clickable Title with file indicator
         const titleTd = document.createElement('td');
-        titleTd.innerHTML = `<strong>${item.titulo}</strong>`;
+        titleTd.innerHTML = `<strong>${item.titulo}</strong>${item.fileUrl ? ` <a href="${item.fileUrl}" target="_blank" title="Ver arquivo" style="font-size:13px;text-decoration:none">📎</a>` : ''}`;
         titleTd.style.cursor = 'pointer';
         titleTd.title = 'Ver detalhes';
-        titleTd.addEventListener('click', () => openDemandaModal(item.id));
+        titleTd.addEventListener('click', (e) => { if (e.target.tagName === 'A') return; openDemandaModal(item.id); });
         tr.appendChild(titleTd);
 
         tr.innerHTML += `<td>${item.categoria === 'video' ? '🎬' : item.categoria === 'arte' ? '🎨' : '✦'} ${item.categoria || '—'}</td><td>${item.plataforma || '—'}</td>`;
@@ -714,6 +714,7 @@ function openDemandaModal(id) {
         document.getElementById('modalCancelBtn').textContent = 'Cancelar';
     }
 
+    addFileUploadSection(item, 'image/*,video/*,.pdf');
     openModal(id ? (role === 'admin' ? '✏️ Editar Demanda' : '👁️ Visualizar Demanda') : '✦ Nova Demanda');
 }
 function openUserModal(idx) {
