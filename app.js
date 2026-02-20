@@ -454,8 +454,20 @@ function renderCalEvents(dk) {
     if (!evs.length) { c.innerHTML = '<p class="empty-msg" style="border:none; background:rgba(250,245,255,.01)">Nenhuma tarefa planejada para este dia.</p>'; return; }
     evs.forEach((ev, idx) => {
         const row = document.createElement('div'); row.className = `ep-row agenda-item chip-${ev.type}`;
-        row.innerHTML = `<span class="chip chip-${ev.type}">${typeLabel(ev.type)}</span><span class="ep-row-text">${ev.title}</span><button class="ep-del" title="Remover">×</button>`;
-        row.querySelector('.ep-del').addEventListener('click', () => {
+        row.style.flexDirection = 'column'; row.style.alignItems = 'flex-start';
+
+        const top = document.createElement('div'); top.style.display = 'flex'; top.style.alignItems = 'center'; top.style.gap = '10px'; top.style.width = '100%';
+        top.innerHTML = `<span class="chip chip-${ev.type}">${typeLabel(ev.type)}</span><span class="ep-row-text">${ev.title}</span><button class="ep-del" title="Remover" style="margin-left:auto;">×</button>`;
+        row.appendChild(top);
+
+        if (ev.obs) {
+            const obsDiv = document.createElement('div');
+            obsDiv.style.fontSize = '11px'; obsDiv.style.color = 'var(--wm)'; obsDiv.style.marginTop = '4px'; obsDiv.style.fontStyle = 'italic'; obsDiv.style.paddingLeft = '5px';
+            obsDiv.textContent = ev.obs;
+            row.appendChild(obsDiv);
+        }
+
+        top.querySelector('.ep-del').addEventListener('click', () => {
             data.eventos[dk].splice(idx, 1); if (!data.eventos[dk].length) delete data.eventos[dk];
             saveData(); renderCalendar(); renderCalEvents(dk);
         });
@@ -466,11 +478,13 @@ function typeLabel(t) { return { video: '🎬 Vídeo', arte: '🎨 Arte', post: 
 function addCalEvent() {
     if (!calDate) return;
     const title = document.getElementById('newEventTitle').value.trim();
+    const obs = document.getElementById('newEventObs').value.trim();
     const type = document.getElementById('newEventType').value;
     if (!title) { showNotif('Digite um título ✦'); return; }
     if (!data.eventos[calDate]) data.eventos[calDate] = [];
-    data.eventos[calDate].push({ title, type });
+    data.eventos[calDate].push({ title, type, obs });
     document.getElementById('newEventTitle').value = '';
+    document.getElementById('newEventObs').value = '';
     saveData(); renderCalendar(); renderCalEvents(calDate); showNotif('Evento adicionado ✦');
 }
 
