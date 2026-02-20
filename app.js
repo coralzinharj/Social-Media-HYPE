@@ -433,7 +433,17 @@ function renderCalendar() {
 }
 function openCalPanel(dk, day) {
     calDate = dk;
-    const pd = document.getElementById('panelDate'); if (pd) pd.textContent = `${day} de ${calMonths[currentMonth]} de ${currentYear}`;
+    const [y, m, d] = dk.split('-');
+    const dateObj = new Date(y, m - 1, d);
+    const dayStr = String(day).padStart(2, '0');
+    const weekdays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const weekdayStr = weekdays[dateObj.getDay()];
+    const monthYearStr = `${calMonths[currentMonth]} de ${currentYear}`;
+
+    const pNum = document.getElementById('panelDayNum'); if (pNum) pNum.textContent = dayStr;
+    const pWd = document.getElementById('panelWeekday'); if (pWd) pWd.textContent = weekdayStr;
+    const pMy = document.getElementById('panelMonthYear'); if (pMy) pMy.textContent = monthYearStr;
+
     renderCalEvents(dk);
     const p = document.getElementById('eventDetailPanel'); if (p) { p.style.display = 'flex'; }
 }
@@ -441,10 +451,10 @@ function renderCalEvents(dk) {
     const evs = (data.eventos || {})[dk] || [];
     const c = document.getElementById('panelEvents'); if (!c) return;
     c.innerHTML = '';
-    if (!evs.length) { c.innerHTML = '<p class="empty-msg">Nenhum evento neste dia.</p>'; return; }
+    if (!evs.length) { c.innerHTML = '<p class="empty-msg" style="border:none; background:rgba(250,245,255,.01)">Nenhuma tarefa planejada para este dia.</p>'; return; }
     evs.forEach((ev, idx) => {
-        const row = document.createElement('div'); row.className = 'ep-row';
-        row.innerHTML = `<span class="chip chip-${ev.type}">${typeLabel(ev.type)}</span><span class="ep-row-text">${ev.title}</span><button class="ep-del">×</button>`;
+        const row = document.createElement('div'); row.className = `ep-row agenda-item chip-${ev.type}`;
+        row.innerHTML = `<span class="chip chip-${ev.type}">${typeLabel(ev.type)}</span><span class="ep-row-text">${ev.title}</span><button class="ep-del" title="Remover">×</button>`;
         row.querySelector('.ep-del').addEventListener('click', () => {
             data.eventos[dk].splice(idx, 1); if (!data.eventos[dk].length) delete data.eventos[dk];
             saveData(); renderCalendar(); renderCalEvents(dk);

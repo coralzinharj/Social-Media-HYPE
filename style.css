@@ -1072,7 +1072,7 @@ body {
 }
 
 
-/* ── EVENT PANEL ── */
+/* ── EVENT PANEL / AGENDA VIEW ── */
 .event-panel-overlay {
     position: fixed;
     inset: 0;
@@ -1085,55 +1085,159 @@ body {
     padding: 20px;
 }
 
-.event-panel {
-    background: rgba(13, 11, 26, .96);
-    border: 1px solid rgba(244, 114, 182, .18);
-    border-radius: var(--r);
-    padding: 22px;
+.event-panel.agenda-view {
+    padding: 0;
     width: 100%;
-    max-width: 500px;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, .7), var(--gr);
+    max-width: 440px;
+    background: #0a0814;
+    border: 1px solid rgba(196, 181, 253, .12);
+    border-radius: var(--r);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(244, 114, 182, 0.1);
     animation: modalIn .22s ease;
+    overflow: hidden;
 }
 
-.ep-header {
+.agenda-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(219, 39, 119, 0.05) 100%);
+    border-bottom: 1px solid rgba(196, 181, 253, .08);
+    position: relative;
+}
+
+.agenda-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--grad);
+}
+
+.agenda-date {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
+    gap: 16px;
 }
 
-.ep-header h3 {
+.agenda-day {
     font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    font-style: italic;
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 0.8;
     background: var(--grad);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.ep-events {
+.agenda-date-info {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
+}
+
+.agenda-weekday {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.agenda-month {
+    color: var(--rose-l);
+    font-family: 'Dancing Script', cursive;
+    font-size: 17px;
+}
+
+.agenda-body {
+    padding: 24px 28px;
+    background: #0d0b1a;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.agenda-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.agenda-body::-webkit-scrollbar-thumb {
+    background: rgba(196, 181, 253, 0.2);
+    border-radius: 6px;
+}
+
+.agenda-events {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     min-height: 40px;
 }
 
-.ep-row {
+.ep-row.agenda-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(250, 245, 255, .03);
-    border: 1px solid rgba(196, 181, 253, .1);
+    gap: 12px;
+    background: rgba(6, 5, 15, 0.6);
+    border: 1px solid rgba(196, 181, 253, 0.06);
+    border-left: 3px solid var(--violet-l);
+    padding: 14px 16px;
     border-radius: var(--rs);
-    padding: 9px 13px;
-    transition: background .18s;
+    transition: background .18s, border-color .18s;
 }
 
-.ep-row:hover {
-    background: rgba(219, 39, 119, .06);
+.ep-row.agenda-item.chip-video {
+    border-left-color: #3b82f6;
+}
+
+.ep-row.agenda-item.chip-arte {
+    border-left-color: #ec4899;
+}
+
+.ep-row.agenda-item.chip-post {
+    border-left-color: #f59e0b;
+}
+
+.ep-row.agenda-item.chip-live {
+    border-left-color: #ef4444;
+}
+
+.ep-row.agenda-item:hover {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(196, 181, 253, 0.15);
+}
+
+.agenda-add {
+    padding: 20px 28px 24px;
+    background: #0a0814;
+    border-top: 1px solid rgba(196, 181, 253, .08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.agenda-add-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--wm);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.agenda-add-row {
+    display: flex;
+    gap: 10px;
+}
+
+.agenda-add-row .field {
+    flex: 1;
+}
+
+.agenda-add-row .btn-primary {
+    padding: 9px 20px;
 }
 
 .ep-row-text {
@@ -1155,12 +1259,6 @@ body {
 .ep-del:hover {
     color: var(--rose-l);
     transform: scale(1.2);
-}
-
-.ep-add {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
 }
 
 /* ── MODAL ── */

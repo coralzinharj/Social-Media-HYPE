@@ -175,22 +175,36 @@
                         <div class="calendar-grid" id="calendarGrid"></div>
                     </div>
                     <div class="event-panel-overlay" id="eventDetailPanel" style="display:none">
-                        <div class="event-panel">
-                            <div class="ep-header">
-                                <h3 id="panelDate"></h3>
-                                <button class="x-btn" id="closePanelBtn">×</button>
+                        <div class="event-panel agenda-view">
+                            <div class="ep-header agenda-header">
+                                <div class="agenda-date">
+                                    <span class="agenda-day" id="panelDayNum"></span>
+                                    <div class="agenda-date-info">
+                                        <span class="agenda-weekday" id="panelWeekday"></span>
+                                        <span class="agenda-month" id="panelMonthYear"></span>
+                                    </div>
+                                </div>
+                                <button class="x-btn" id="closePanelBtn" style="margin-top:-6px;">×</button>
                             </div>
-                            <div id="panelEvents" class="ep-events"></div>
-                            <div class="ep-add">
-                                <input class="field" type="text" id="newEventTitle" placeholder="Título do evento…" />
-                                <select class="field sel" id="newEventType">
-                                    <option value="video">🎬 Vídeo</option>
-                                    <option value="arte">🎨 Arte</option>
-                                    <option value="post">📸 Post</option>
-                                    <option value="live">📡 Live</option>
-                                    <option value="outro">✦ Outro</option>
-                                </select>
-                                <button class="btn-ghost" id="addEventBtn">+ Adicionar</button>
+                            <div class="agenda-body">
+                                <div id="panelEvents" class="ep-events agenda-events"></div>
+                            </div>
+                            <div class="ep-add agenda-add">
+                                <h4 class="agenda-add-title">✦ Novo Planejamento</h4>
+                                <div class="agenda-add-row">
+                                    <input class="field" type="text" id="newEventTitle"
+                                        placeholder="O que vamos fazer?" />
+                                </div>
+                                <div class="agenda-add-row">
+                                    <select class="field sel" id="newEventType">
+                                        <option value="video">🎬 Vídeo</option>
+                                        <option value="arte">🎨 Arte</option>
+                                        <option value="post">📸 Post</option>
+                                        <option value="live">📡 Live</option>
+                                        <option value="outro">✦ Outro</option>
+                                    </select>
+                                    <button class="btn-primary" id="addEventBtn">Adicionar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
