@@ -305,6 +305,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Calendar panel
     document.getElementById('addEventBtn').addEventListener('click', addCalEvent);
     document.getElementById('closePanelBtn').addEventListener('click', () => { document.getElementById('eventDetailPanel').style.display = 'none'; calDate = null; });
+    document.getElementById('eventDetailPanel').addEventListener('click', e => { if (e.target === document.getElementById('eventDetailPanel')) { document.getElementById('eventDetailPanel').style.display = 'none'; calDate = null; } });
 });
 
 
@@ -434,7 +435,7 @@ function openCalPanel(dk, day) {
     calDate = dk;
     const pd = document.getElementById('panelDate'); if (pd) pd.textContent = `${day} de ${calMonths[currentMonth]} de ${currentYear}`;
     renderCalEvents(dk);
-    const p = document.getElementById('eventDetailPanel'); if (p) { p.style.display = 'block'; p.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    const p = document.getElementById('eventDetailPanel'); if (p) { p.style.display = 'flex'; }
 }
 function renderCalEvents(dk) {
     const evs = (data.eventos || {})[dk] || [];

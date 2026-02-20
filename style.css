@@ -1073,15 +1073,27 @@ body {
 
 
 /* ── EVENT PANEL ── */
+.event-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .75);
+    backdrop-filter: blur(10px);
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
 .event-panel {
-    background: rgba(13, 11, 26, .8);
+    background: rgba(13, 11, 26, .96);
     border: 1px solid rgba(244, 114, 182, .18);
     border-radius: var(--r);
     padding: 22px;
-    margin-top: 20px;
-    backdrop-filter: blur(18px);
-    box-shadow: var(--gr);
-    animation: fadeUp .22s ease;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, .7), var(--gr);
+    animation: modalIn .22s ease;
 }
 
 .ep-header {
