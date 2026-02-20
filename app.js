@@ -63,37 +63,9 @@ function addCreativeIdeasSection(item) {
     sec.className = 'field-group';
     sec.id = 'creativeIdeasSection';
 
-    // Build existing reference images HTML
-    const refImgs = item?.referenciaImgs || [];
-    const imgsHtml = refImgs.map((url, i) => `
-        <div id="refImg_${i}" style="display:inline-flex;align-items:center;gap:6px;margin:4px 6px 4px 0;background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px">
-            <a href="${url}" target="_blank"><img src="${url}" style="height:40px;width:40px;object-fit:cover;border-radius:6px;vertical-align:middle" onerror="this.style.display='none'"></a>
-            <button class="btn-ghost remove-ref-img" data-idx="${i}" style="font-size:11px;color:#e05;padding:2px 6px">✕</button>
-        </div>`).join('');
-
-    sec.innerHTML = `<label>💡 Ideias Criativas & Referências</label>
-    <div style="margin-bottom:8px">
-        <div id="refImgsList" style="margin-bottom:6px">${imgsHtml}</div>
-        <input type="file" id="refImgInput" accept="image/*" multiple style="color:#ccc;font-size:13px">
-        <small style="color:#888;display:block;margin-top:3px">Adicione imagens de referência (pode selecionar várias)</small>
-    </div>
-    <div style="margin-top:8px">
-        <label style="font-size:12px;color:#aaa;font-weight:500">🔗 Links de Referência</label>
-        <textarea id="referenciaLinks" class="field" placeholder="Cole URLs de referência, uma por linha" style="min-height:70px;resize:vertical;margin-top:4px">${(item?.referenciaLinks || []).join('\n')}</textarea>
-    </div>`;
+    sec.innerHTML = `<label>🔗 Links de Referência</label>
+    <textarea id="referenciaLinks" class="field" placeholder="Cole URLs de referência, uma por linha" style="min-height:80px;resize:vertical;margin-top:4px">${(item?.referenciaLinks || []).join('\n')}</textarea>`;
     body.appendChild(sec);
-
-    // Remove existing reference image
-    sec.querySelectorAll('.remove-ref-img').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = parseInt(btn.dataset.idx);
-            btn.closest('[id^="refImg_"]').remove();
-            btn.dataset.removed = 'true';
-            if (!window._removedRefImgs) window._removedRefImgs = new Set();
-            window._removedRefImgs.add(idx);
-        });
-    });
-    window._removedRefImgs = new Set();
 }
 
 // ── PARTICLES ──────────────────────────────────────
