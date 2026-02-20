@@ -425,8 +425,18 @@ function renderCalendar() {
         const el = document.createElement('div');
         el.className = 'cal-day' + (dk === todayKey ? ' today' : '') + (evs.length > 0 ? ' has-events' : '');
         const num = document.createElement('div'); num.className = 'cal-day-num'; num.textContent = d; el.appendChild(num);
-        evs.slice(0, 2).forEach(ev => { const c = document.createElement('div'); c.className = `chip chip-${ev.type}`; c.textContent = ev.title; el.appendChild(c); });
-        if (evs.length > 2) { const more = document.createElement('div'); more.className = 'chip chip-outro'; more.textContent = `+${evs.length - 2} mais`; el.appendChild(more); }
+        evs.slice(0, 3).forEach(ev => {
+            const c = document.createElement('div');
+            c.className = `chip chip-${ev.type}`;
+            // Remove the "[Categoria] " prefix from the visual chip since the color/icon already indicates it
+            let shortTitle = ev.title;
+            const match = shortTitle.match(/^\[.*?\]\s*(.*)$/);
+            if (match) shortTitle = match[1];
+            // Also trim if too long
+            c.textContent = shortTitle;
+            el.appendChild(c);
+        });
+        if (evs.length > 3) { const more = document.createElement('div'); more.className = 'chip chip-outro'; more.textContent = `+${evs.length - 3} mais`; el.appendChild(more); }
         el.addEventListener('click', () => openCalPanel(dk, d));
         grid.appendChild(el);
     }
