@@ -603,16 +603,21 @@ function openVideoModal(id) {
     modalSection = 'videos'; const item = id ? (data.videos || []).find(v => v.id === id) : null; editTarget = id ? { section: 'videos', id } : null;
     document.getElementById('modalBody').innerHTML = [fld('Título', 'titulo', 'text', { value: item?.titulo, ph: 'Ex: Apresentação do servidor' }), fld('Tipo', 'tipo', 'select', { value: item?.tipo || 'Reels', options: [{ v: 'Reels', l: '🎞️ Reels' }, { v: 'YouTube', l: '▶️ YouTube' }, { v: 'TikTok', l: '🎵 TikTok' }, { v: 'Stories', l: '📱 Stories' }, { v: 'Live', l: '📡 Live' }, { v: 'Cortado', l: '✂️ Cortado' }] }), fld('Responsável', 'responsavel', 'text', { value: item?.responsavel, ph: 'Nome do editor' }), fld('Data Prevista', 'date', 'date', { value: item?.date }), fld('Plataforma', 'plataforma', 'select', { value: item?.plataforma || 'Instagram', options: [{ v: 'Instagram', l: '📸 Instagram' }, { v: 'YouTube', l: '▶️ YouTube' }, { v: 'TikTok', l: '🎵 TikTok' }, { v: 'Discord', l: '💬 Discord' }, { v: 'Todos', l: '🌐 Todos' }] }), fld('Status', 'status', 'select', { value: item?.status || 'a-fazer', options: ST_OPTS }), fld('Observações', 'obs', 'textarea', { value: item?.obs })].join('');
 
-    // Read-only for non-admins
+    // Read-only for non-admins, except Status
     const sess = sessionStorage.getItem('hype_session');
     const role = sess ? JSON.parse(sess).role : 'designer';
     if (role !== 'admin') {
         const body = document.getElementById('modalBody');
         body.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
-        document.getElementById('modalConfirmBtn').style.display = 'none';
+        // Re-enable only the Status field
+        const statusEl = body.querySelector('[data-key="status"]');
+        if (statusEl) statusEl.disabled = false;
+        document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalConfirmBtn').textContent = 'Salvar Status';
         document.getElementById('modalCancelBtn').textContent = 'Fechar';
     } else {
         document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalConfirmBtn').textContent = 'Salvar';
         document.getElementById('modalCancelBtn').textContent = 'Cancelar';
     }
 
@@ -622,16 +627,21 @@ function openArteModal(id) {
     modalSection = 'artes'; const item = id ? (data.artes || []).find(a => a.id === id) : null; editTarget = id ? { section: 'artes', id } : null;
     document.getElementById('modalBody').innerHTML = [fld('Título', 'titulo', 'text', { value: item?.titulo, ph: 'Ex: Banner do evento' }), fld('Tipo', 'tipo', 'select', { value: item?.tipo || 'Post Feed', options: [{ v: 'Post Feed', l: '🖼️ Post Feed' }, { v: 'Stories', l: '📱 Stories' }, { v: 'Banner', l: '🎨 Banner' }, { v: 'Logo', l: '✨ Logo' }, { v: 'Thumbnail', l: '🖥️ Thumbnail' }, { v: 'Flyer', l: '📄 Flyer' }] }), fld('Responsável', 'responsavel', 'text', { value: item?.responsavel, ph: 'Nome do designer' }), fld('Data Prevista', 'date', 'date', { value: item?.date }), fld('Formato', 'formato', 'select', { value: item?.formato || '1080x1080', options: [{ v: '1080x1080', l: '1080×1080 (Feed)' }, { v: '1080x1920', l: '1080×1920 (Stories)' }, { v: '1920x1080', l: '1920×1080 (Banner)' }, { v: '1280x720', l: '1280×720 (Thumb)' }, { v: 'Outro', l: 'Outro' }] }), fld('Status', 'status', 'select', { value: item?.status || 'a-fazer', options: ST_OPTS }), fld('Observações', 'obs', 'textarea', { value: item?.obs })].join('');
 
-    // Read-only for non-admins
+    // Read-only for non-admins, except Status
     const sess = sessionStorage.getItem('hype_session');
     const role = sess ? JSON.parse(sess).role : 'designer';
     if (role !== 'admin') {
         const body = document.getElementById('modalBody');
         body.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
-        document.getElementById('modalConfirmBtn').style.display = 'none';
+        // Re-enable only the Status field
+        const statusEl = body.querySelector('[data-key="status"]');
+        if (statusEl) statusEl.disabled = false;
+        document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalConfirmBtn').textContent = 'Salvar Status';
         document.getElementById('modalCancelBtn').textContent = 'Fechar';
     } else {
         document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalConfirmBtn').textContent = 'Salvar';
         document.getElementById('modalCancelBtn').textContent = 'Cancelar';
     }
 
@@ -645,15 +655,20 @@ function openDemandaModal(id) {
     body.innerHTML = [fld('Título', 'titulo', 'text', { value: item?.titulo, ph: 'Ex: Post de recrutamento' }), fld('Categoria', 'categoria', 'select', { value: item?.categoria || 'video', options: [{ v: 'video', l: '🎬 Vídeo' }, { v: 'arte', l: '🎨 Arte' }, { v: 'outro', l: '✦ Outro' }] }), fld('Plataforma', 'plataforma', 'select', { value: item?.plataforma || 'Instagram', options: [{ v: 'Instagram', l: '📸 Instagram' }, { v: 'TikTok', l: '🎵 TikTok' }, { v: 'YouTube', l: '▶️ YouTube' }, { v: 'Discord', l: '💬 Discord' }, { v: 'Twitter/X', l: '🐦 Twitter/X' }, { v: 'Todos', l: '🌐 Todos' }, { v: 'N/A', l: '— N/A' }] }), fld('Prioridade', 'prioridade', 'select', { value: item?.prioridade || 'media', options: [{ v: 'alta', l: '🔴 Alta' }, { v: 'media', l: '🟡 Média' }, { v: 'baixa', l: '🟢 Baixa' }] }), fld('Responsável', 'responsavel', 'text', { value: item?.responsavel, ph: 'Nome do responsável' }), fld('Prazo', 'prazo', 'date', { value: item?.prazo }), fld('Status', 'status', 'select', { value: item?.status || 'a-fazer', options: ST_OPTS }), fld('Observações', 'obs', 'textarea', { value: item?.obs })].join('');
     body.dataset.monthKey = mk;
 
-    // Read-only for non-admins
+    // Read-only for non-admins, except Status
     const sess = sessionStorage.getItem('hype_session');
     const role = sess ? JSON.parse(sess).role : 'designer';
     if (role !== 'admin') {
         body.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
-        document.getElementById('modalConfirmBtn').style.display = 'none';
+        // Re-enable only the Status field
+        const statusEl = body.querySelector('[data-key="status"]');
+        if (statusEl) statusEl.disabled = false;
+        document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalConfirmBtn').textContent = 'Salvar Status';
         document.getElementById('modalCancelBtn').textContent = 'Fechar';
     } else {
         document.getElementById('modalConfirmBtn').style.display = 'inline-block';
+        document.getElementById('modalConfirmBtn').textContent = 'Salvar';
         document.getElementById('modalCancelBtn').textContent = 'Cancelar';
     }
 
@@ -684,6 +699,29 @@ function saveModal() {
             users.push({ username: vals.username.trim().toLowerCase(), password: vals.password.trim(), role: vals.role || 'designer' });
         }
         saveUsers(users); renderUsers(); closeModal(); showNotif('Usuário salvo ✦');
+        return;
+    }
+
+    // Check admin role — non-admins only save status
+    const _sess = sessionStorage.getItem('hype_session');
+    const _role = _sess ? JSON.parse(_sess).role : 'designer';
+
+    if (_role !== 'admin') {
+        // Non-admin: only save status (ignore all other vals)
+        if (editTarget) {
+            const arr = data[editTarget.section];
+            const idx = arr.findIndex(i => i.id === editTarget.id);
+            if (idx !== -1) {
+                arr[idx].status = vals.status;
+            }
+        }
+        saveData();
+        if (editTarget?.section === 'videos') renderVideos();
+        else if (editTarget?.section === 'artes') renderArtes();
+        else renderDemanda();
+        renderDashboard();
+        closeModal();
+        showNotif('Status atualizado ✦');
         return;
     }
 
