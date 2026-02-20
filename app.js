@@ -457,7 +457,46 @@ function renderCalEvents(dk) {
         row.style.flexDirection = 'column'; row.style.alignItems = 'flex-start';
 
         const top = document.createElement('div'); top.style.display = 'flex'; top.style.alignItems = 'center'; top.style.gap = '10px'; top.style.width = '100%';
-        top.innerHTML = `<span class="chip chip-${ev.type}">${typeLabel(ev.type)}</span><span class="ep-row-text">${ev.title}</span><button class="ep-del" title="Remover" style="margin-left:auto;">×</button>`;
+
+        const typeChip = document.createElement('span');
+        typeChip.className = `chip chip-${ev.type}`;
+        typeChip.textContent = typeLabel(ev.type);
+        top.appendChild(typeChip);
+
+        const titleDiv = document.createElement('span');
+        titleDiv.className = 'ep-row-text';
+        titleDiv.title = 'Clique para editar o título';
+        titleDiv.style.flex = '1';
+        titleDiv.style.cursor = 'text';
+        titleDiv.style.outline = 'none';
+        titleDiv.style.padding = '2px 4px';
+        titleDiv.style.borderRadius = '4px';
+        titleDiv.style.border = '1px solid transparent';
+        titleDiv.style.transition = 'border-color 0.2s, background 0.2s';
+        titleDiv.contentEditable = 'true';
+        titleDiv.textContent = ev.title;
+
+        titleDiv.addEventListener('focus', () => { titleDiv.style.borderColor = 'rgba(196,181,253,0.3)'; titleDiv.style.background = 'rgba(0,0,0,0.3)'; });
+        titleDiv.addEventListener('blur', () => {
+            titleDiv.style.borderColor = 'transparent'; titleDiv.style.background = 'transparent';
+            const newTitle = titleDiv.textContent.trim();
+            if (newTitle && newTitle !== ev.title) {
+                ev.title = newTitle;
+                saveData(); showNotif('Título atualizado ✦');
+                renderDashboard(); // Update other views just in case
+            } else if (!newTitle) {
+                titleDiv.textContent = ev.title; // Revert if empty
+            }
+        });
+        top.appendChild(titleDiv);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'ep-del';
+        delBtn.title = 'Remover';
+        delBtn.innerHTML = '×';
+        delBtn.style.marginLeft = 'auto';
+        top.appendChild(delBtn);
+
         row.appendChild(top);
 
         if (ev.obs) {
