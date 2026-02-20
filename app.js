@@ -858,6 +858,9 @@ async function saveModal() {
         const arr = data[editTarget.section];
         const idx = arr.findIndex(i => i.id === editTarget.id);
         if (idx !== -1) {
+            const oldTitulo = arr[idx].titulo;
+            const newTitulo = vals.titulo;
+
             arr[idx] = { ...arr[idx], ...vals };
             if (uploadedFileUrl) arr[idx].fileUrl = uploadedFileUrl;
             if (removeFile) delete arr[idx].fileUrl;
@@ -871,6 +874,20 @@ async function saveModal() {
                 arr[idx].referenciaImgs = existing.filter((_, i) => !window._removedRefImgs.has(i));
             }
             if (referenciaLinks !== null) arr[idx].referenciaLinks = referenciaLinks;
+
+            // Update calendar events if title changed
+            if (oldTitulo && newTitulo && oldTitulo !== newTitulo) {
+                if (data.eventos) {
+                    for (const day in data.eventos) {
+                        data.eventos[day].forEach(ev => {
+                            if (ev.title.includes(oldTitulo)) {
+                                ev.title = ev.title.replace(oldTitulo, newTitulo);
+                            }
+                        });
+                    }
+                }
+            }
+
             if (editTarget.section === 'demanda') {
                 const linked = arr[idx].linkedId;
                 if (linked) {
