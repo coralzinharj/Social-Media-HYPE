@@ -880,8 +880,18 @@ async function saveModal() {
                 if (data.eventos) {
                     for (const day in data.eventos) {
                         data.eventos[day].forEach(ev => {
+                            // Check if the old title is a substring of the event title
                             if (ev.title.includes(oldTitulo)) {
                                 ev.title = ev.title.replace(oldTitulo, newTitulo);
+                            } else {
+                                // Sometimes emojis or prefixes differ. A safer fallback:
+                                // if the event title ends with the old title, we replace the end.
+                                const lowerEv = ev.title.toLowerCase();
+                                const lowerOld = oldTitulo.toLowerCase();
+                                if (lowerEv.includes(lowerOld)) {
+                                    const idx = lowerEv.indexOf(lowerOld);
+                                    ev.title = ev.title.substring(0, idx) + newTitulo + ev.title.substring(idx + oldTitulo.length);
+                                }
                             }
                         });
                     }
