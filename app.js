@@ -166,7 +166,7 @@ function applyLogin(username, role) {
         const tt = document.getElementById('topbarTitle'); if (tt) tt.textContent = topTitles[firstTab] || '';
     }
     const mnav = document.querySelector('.month-nav');
-    if (mnav) mnav.style.display = (role === 'admin') ? 'flex' : 'none';
+    if (mnav) mnav.style.display = 'flex';
 
     updateDate(); updateMonthLabel();
 
