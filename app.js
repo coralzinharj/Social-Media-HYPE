@@ -18,6 +18,46 @@ const dataRef = db.collection('plannerData').doc('main');
 const usersRef = db.collection('config').doc('users');
 let _syncUnsub = null; // real-time listener unsubscribe handle
 
+// ── CLOUDINARY CONFIG ───────────────────────────────
+const CLOUDINARY_CLOUD = 'dm9jzth0g';
+const CLOUDINARY_PRESET = 'social midia hype';
+
+async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_PRESET);
+    formData.append('resource_type', 'auto');
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('Erro no upload');
+    const json = await res.json();
+    return json.secure_url;
+}
+
+function addFileUploadSection(item, accept = 'image/*,video/*,.pdf') {
+    const body = document.getElementById('modalBody');
+    const sec = document.createElement('div');
+    sec.className = 'field-group';
+    sec.id = 'fileUploadSection';
+    sec.innerHTML = `<label>📎 Arquivo Entregue</label>
+    ${item?.fileUrl ? `<div id="filePreview" style="margin-bottom:8px">
+        <a href="${item.fileUrl}" target="_blank" class="btn-ghost" style="display:inline-flex;align-items:center;gap:6px;font-size:13px">📄 Ver arquivo enviado</a>
+        <button id="removeFileBtn" class="btn-ghost" style="color:#e05;margin-left:8px;font-size:12px">🗑️ Remover</button>
+    </div>` : ''}
+    <input type="file" id="fileUploadInput" accept="${accept}" style="margin-top:4px;color:#ccc;font-size:13px">
+    <small style="color:#888;margin-top:4px;display:block">Imagens, vídeos ou PDF • Max 100MB</small>`;
+    body.appendChild(sec);
+
+    const removeBtn = document.getElementById('removeFileBtn');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+            document.getElementById('filePreview').remove();
+            // Mark for removal
+            document.getElementById('fileUploadInput').dataset.removeFile = 'true';
+        });
+    }
+}
+
+
 
 // ── PARTICLES ──────────────────────────────────────
 (function () {
@@ -621,6 +661,7 @@ function openVideoModal(id) {
         document.getElementById('modalCancelBtn').textContent = 'Cancelar';
     }
 
+    addFileUploadSection(item, 'video/*');
     openModal(id ? (role === 'admin' ? '✏️ Editar Vídeo' : '👁️ Visualizar Vídeo') : '🎬 Novo Vídeo');
 }
 function openArteModal(id) {
@@ -645,6 +686,7 @@ function openArteModal(id) {
         document.getElementById('modalCancelBtn').textContent = 'Cancelar';
     }
 
+    addFileUploadSection(item, 'image/*,.pdf');
     openModal(id ? (role === 'admin' ? '✏️ Editar Arte' : '👁️ Visualizar Arte') : '🎨 Nova Arte');
 }
 function openDemandaModal(id) {
@@ -682,7 +724,7 @@ function openUserModal(idx) {
     openModal(item ? '✏️ Editar Usuário' : '+ Novo Usuário');
 }
 
-function saveModal() {
+async function saveModal() {
     const vals = getVals();
 
     if (modalSection === 'usuario') {
@@ -702,17 +744,41 @@ function saveModal() {
         return;
     }
 
-    // Check admin role — non-admins only save status
+    // Handle file upload (runs for all roles when a file is selected)
+    let uploadedFileUrl = null;
+    const fileInput = document.getElementById('fileUploadInput');
+    const removeFile = fileInput?.dataset.removeFile === 'true';
+    if (fileInput?.files?.length > 0) {
+        const btn = document.getElementById('modalConfirmBtn');
+        const origText = btn.textContent;
+        btn.textContent = '⏳ Enviando...';
+        btn.disabled = true;
+        try {
+            uploadedFileUrl = await uploadToCloudinary(fileInput.files[0]);
+            showNotif('Arquivo enviado ✦');
+        } catch (e) {
+            showNotif('Erro no upload. Tente novamente.');
+            btn.textContent = origText;
+            btn.disabled = false;
+            return;
+        }
+        btn.disabled = false;
+        btn.textContent = origText;
+    }
+
+    // Check admin role — non-admins only save status + file
     const _sess = sessionStorage.getItem('hype_session');
     const _role = _sess ? JSON.parse(_sess).role : 'designer';
 
     if (_role !== 'admin') {
-        // Non-admin: only save status (ignore all other vals)
+        // Non-admin: only save status and file url
         if (editTarget) {
             const arr = data[editTarget.section];
             const idx = arr.findIndex(i => i.id === editTarget.id);
             if (idx !== -1) {
                 arr[idx].status = vals.status;
+                if (uploadedFileUrl) arr[idx].fileUrl = uploadedFileUrl;
+                if (removeFile) delete arr[idx].fileUrl;
             }
         }
         saveData();
@@ -721,7 +787,7 @@ function saveModal() {
         else renderDemanda();
         renderDashboard();
         closeModal();
-        showNotif('Status atualizado ✦');
+        showNotif('Salvo ✦');
         return;
     }
 
@@ -732,6 +798,8 @@ function saveModal() {
         const idx = arr.findIndex(i => i.id === editTarget.id);
         if (idx !== -1) {
             arr[idx] = { ...arr[idx], ...vals };
+            if (uploadedFileUrl) arr[idx].fileUrl = uploadedFileUrl;
+            if (removeFile) delete arr[idx].fileUrl;
             if (editTarget.section === 'demanda') {
                 const linked = arr[idx].linkedId;
                 if (linked) {
