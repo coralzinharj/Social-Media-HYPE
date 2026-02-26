@@ -1,0 +1,16 @@
+{
+    "name": "social-media-hype",
+    "version": "1.0.0",
+    "description": "Hype Roleplay Planner",
+    "main": "index.html",
+    "scripts": {
+        "start": "serve .",
+        "build": "echo \"No build step required\""
+    },
+    "keywords": [],
+    "author": "coralzinharj",
+    "license": "ISC",
+    "dependencies": {
+        "serve": "^14.2.1"
+    }
+}
